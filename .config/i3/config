@@ -194,7 +194,7 @@ mode "$launcher" {
 }
 
 set $power Power: [s]hutdown | [r]eboot | [l]ogout
-bindsym $mod+p exec "i3-nagbar -t warning -m 'What do you want to do?' \
+bindsym $mod+p exec --no-startup-id "i3-nagbar -t warning -m 'What do you want to do?' \
 -b 'log out' 'i3msg exit' \
 -b 'reboot' 'reboot' \
 -b 'shutdown' 'shutdown now'"
@@ -206,4 +206,9 @@ smart_borders on
 
 gaps inner 10
 gaps outer 10
+
+# Spotify control
+bindsym $mod+z exec --no-startup-id "spotifycli --prev"
+bindsym $mod+x exec --no-startup-id "spotifycli --playpause"
+bindsym $mod+c exec --no-startup-id "spotifycli --next"
 
