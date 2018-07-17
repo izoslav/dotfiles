@@ -166,7 +166,7 @@ exec --no-startup-id compton -b
 exec --no-startup-id volumeicon
 
 # Bindings
-bindsym Control+$mod+l exec "i3lock -c 000000"
+bindsym Control+$mod+l exec "i3lock -c 000000 -i /home/izoslav/Pictures/wallpapers/current.png"
 bindsym $mod+e exec nautilus
 bindsym Print exec scrot '%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f ~/Pictures/screenshots'
 bindsym Control+Print exec 'gnome-screenshot -a -c'
