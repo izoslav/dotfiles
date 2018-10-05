@@ -164,6 +164,7 @@ bar {
 exec --no-startup-id feh --bg-scale /home/izoslav/Pictures/wallpapers/current.png
 exec --no-startup-id compton -b
 exec --no-startup-id volumeicon
+exec --no-startup-id nm-applet
 
 # Bindings
 bindsym Control+$mod+l exec "i3lock -c 000000 -i /home/izoslav/Pictures/wallpapers/current.png"
@@ -184,10 +185,10 @@ set $launcher Launch: [c]hrome | [m]ailspring | [s]lack | jb-[t]oolbox
 bindsym $mod+o mode "$launcher"
 
 mode "$launcher" {
-  bindsym c exec google-chrome-stable
-  bindsym m exec mailspring
-  bindsym s exec slack
-  bindsym t exec jetbrains-toolbox
+  bindsym c exec --no-startup-id google-chrome-stable
+  bindsym m exec --no-startup-id mailspring
+  bindsym s exec --no-startup-id slack
+  bindsym t exec --no-startup-id jetbrains-toolbox
 
   bindsym Escape mode default
   bindsym Return mode default
