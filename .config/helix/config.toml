@@ -1,0 +1,45 @@
+theme = "catppuccin_mocha"
+
+[editor]
+bufferline = "multiple"
+color-modes = true
+line-number = "relative"
+rulers = [120]
+shell = ["fish", "-c"]
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+
+[editor.indent-guides]
+character = "┆"
+render = true
+skip-levels = 1
+
+[editor.statusline]
+left = ["mode", "spinner", "file-modification-indicator", "file-name"]
+right = ["version-control", "diagnostics", "selections", "position", "file-encoding"]
+
+[editor.whitespace.render]
+space = "all"
+tab = "all"
+nbsp = "all"
+nnbsp = "all"
+newline = "none"
+
+[keys.insert]
+C-space = "completion"
+
+[keys.normal]
+g = { a = "code_action" }
+space = { "[" = "goto_previous_buffer", "]" = "goto_next_buffer" }
+
+[keys.normal."+"]
+m = ":run-shell-command make"
+j = ":run-shell-command just"
+c = ":run-shell-command cargo build"
+t = ":run-shell-command cargo test"

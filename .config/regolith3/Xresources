@@ -1,0 +1,9 @@
+# nvidia proprietary drivers bullshit
+regolith.sway.unsupported_gpu: true
+
+# replace i3xrocks with i3status-rs
+wm.bar.position: top
+wm.bar.status_command: i3status-rs
+
+!regolith.look.path: /usr/share/regolith-look/catppuccin
+regolith.look.path: /usr/share/regolith-look/lascaille
