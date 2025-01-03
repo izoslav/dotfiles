@@ -6,6 +6,7 @@ color-modes = true
 line-number = "relative"
 rulers = [120]
 shell = ["fish", "-c"]
+true-color = true
 
 [editor.cursor-shape]
 insert = "bar"
