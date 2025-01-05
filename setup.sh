@@ -67,6 +67,8 @@ rm $tools/go.tar.gz &>/dev/null
 export PATH=$PATH:/usr/local/go/bin &>/dev/null
 
 # install go tools
+export GOBIN=/home/$user/go/bin
+
 echo "Installing go packages..."
 echo "  delve - debugger"
 go install github.com/go-delve/delve/cmd/dlv@latest &>/dev/null
