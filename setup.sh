@@ -25,6 +25,7 @@ Installing packages via apt-get...
   stow             - symlink manager
   fzf              - fuzzy finder
   fish             - shell
+  git-delta        - diff viewer
   ripgrep          - grep replacement
   just             - task runner
   rustup           - rust installation manager
@@ -36,6 +37,7 @@ sudo apt-get install -y \
 	stow \
 	fzf \
 	fish \
+	git-delta \
 	ripgrep \
 	just \
 	rustup \
@@ -88,6 +90,7 @@ rm $tools/helix.tar.xz &>/dev/null
 
 # run stow
 echo "Creating symlinks to dotfiles..."
+mkdir -p /home/$user/.config
 stow . -t /home/$user &>/dev/null
 
 echo "Done!"
