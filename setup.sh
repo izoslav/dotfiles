@@ -10,10 +10,26 @@ user=$1
 tools=/home/$user/tools
 
 # versions
+go_version=1.23.4
 helix_version=25.01
 
+# download links
+go_url=https://go.dev/dl/go$go_version.linux-amd64.tar.gz
+helix_url=https://github.com/helix-editor/helix/releases/download/$helix_version/helix-$helix_version-x86_64-linux.tar.xz
+
 # install packaged tools
-echo "Installing packages via apt-get..."
+cat << EOF
+Installing packages via apt-get...
+  build-essentials - basic complilers and tools
+  cmake            - build system
+  stow             - symlink manager
+  fzf              - fuzzy finder
+  fish             - shell
+  ripgrep          - grep replacement
+  just             - task runner
+  rustup           - rust installation manager
+  sqlite3          - cli for sqlite3
+EOF
 sudo apt-get install -y \
 	build-essentials \
 	cmake \
@@ -23,40 +39,55 @@ sudo apt-get install -y \
 	ripgrep \
 	just \
 	rustup \
-	go \
-	sqlite3
+	sqlite3 \
+	&>/dev/null
 
 # install rust tools
 echo "Configuring rust..."
-rustup default stable
+rustup default stable &>/dev/null
 
 echo "Installing packages via cargo..."
-cargo install --locked \
-	bat \
-	eza \
-	starship \
-	zellij
+echo "  bat       - improved cat"
+cargo install --locked bat &>/dev/null
+echo "  eza      - ls replacement"
+cargo install --locked eza &>/dev/null
+echo "  starship - shell prompt"
+cargo install --locked starship &>/dev/null
+echo "  zellij   - terminal multiplexer"
+cargo install --locked zellij &>/dev/null
+
+# install go
+echo "Installing go $go_version"
+wget $go_url -O $tools/go.tar.gz &>/dev/null
+rm -rf /usr/local/go &>/dev/null
+tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
+rm $tools/go.tar.gz &>/dev/null
+export PATH=$PATH:/usr/local/go/bin &>/dev/null
 
 # install go tools
 echo "Installing go packages..."
-echo "  gow"
-go install github.com/mitranim/gow@latest
-echo "  goose"
-go install github.com/pressly/goose/v3/cmd/goose@latest
+echo "  delve - debugger"
+go install github.com/go-delve/delve/cmd/dlv@latest &>/dev/null
+echo "  goose - migration runner"
+go install github.com/pressly/goose/v3/cmd/goose@latest &>/dev/null
+echo "  gopls - language server"
+go install golang.org/x/tools/gopls@latest &>/dev/null
+echo "  gow   - go watch"
+go install github.com/mitranim/gow@latest &>/dev/null
 
 # create folders
 echo "Downlading and installing other tools..."
-mkdir $tools
+mkdir -p $tools
 
 # download helix
 echo "  helix $helix_version"
-wget https://github.com/helix-editor/helix/releases/download/$helix_version/helix-$helix_version-x86_64-linux.tar.xz -O $tools/helix.tar.xz
-tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/helix/" -C $tools
-sudo ln -sf $tools/helix/hx /usr/bin/hx
-rm $tools/helix.tar.xz
+wget $helix_url -O $tools/helix.tar.xz &>/dev/null
+tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/helix/" -C $tools &>/dev/null
+sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
+rm $tools/helix.tar.xz &>/dev/null
 
 # run stow
 echo "Creating symlinks to dotfiles..."
-stow . -t /home/$user
+stow . -t /home/$user &>/dev/null
 
 echo "Done!"
