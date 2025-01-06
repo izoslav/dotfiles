@@ -6,12 +6,19 @@ if [ "$EUID" -ne 0 ]; then
 	exit
 fi
 
+# TODO organize into functions
+# TODO prettier formatting
+# TODO add git config
+
 user=$1
 tools=/home/$user/tools
 
 # versions
 go_version=1.23.4
 helix_version=25.01
+
+# update apt
+sudo apt-get update
 
 # download links
 go_url=https://go.dev/dl/go$go_version.linux-amd64.tar.gz
@@ -20,7 +27,7 @@ helix_url=https://github.com/helix-editor/helix/releases/download/$helix_version
 # install packaged tools
 cat << EOF
 Installing packages via apt-get...
-  build-essentials - basic complilers and tools
+  build-essential  - basic complilers and tools
   cmake            - build system
   stow             - symlink manager
   fzf              - fuzzy finder
@@ -32,7 +39,7 @@ Installing packages via apt-get...
   sqlite3          - cli for sqlite3
 EOF
 sudo apt-get install -y \
-	build-essentials \
+	build-essential \
 	cmake \
 	stow \
 	fzf \
@@ -49,7 +56,7 @@ echo "Configuring rust..."
 rustup default stable &>/dev/null
 
 echo "Installing packages via cargo..."
-echo "  bat       - improved cat"
+echo "  bat      - improved cat"
 cargo install --locked bat &>/dev/null
 echo "  eza      - ls replacement"
 cargo install --locked eza &>/dev/null
