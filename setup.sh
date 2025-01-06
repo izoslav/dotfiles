@@ -9,6 +9,7 @@ fi
 # TODO organize into functions
 # TODO prettier formatting
 # TODO add git config
+# TODO handle sudo better
 
 user=$1
 tools=/home/$user/tools
@@ -53,17 +54,17 @@ sudo apt-get install -y \
 
 # install rust tools
 echo "Configuring rust..."
-rustup default stable &>/dev/null
+sudo -H -u $user rustup default stable &>/dev/null
 
 echo "Installing packages via cargo..."
 echo "  bat      - improved cat"
-cargo install --locked bat &>/dev/null
+sudo -H -u $user cargo install --locked bat &>/dev/null
 echo "  eza      - ls replacement"
-cargo install --locked eza &>/dev/null
+sudo -H -u $user cargo install --locked eza &>/dev/null
 echo "  starship - shell prompt"
-cargo install --locked starship &>/dev/null
+sudo -H -u $user cargo install --locked starship &>/dev/null
 echo "  zellij   - terminal multiplexer"
-cargo install --locked zellij &>/dev/null
+sudo -H -u $user cargo install --locked zellij &>/dev/null
 
 # install go
 echo "Installing go $go_version"
@@ -96,6 +97,11 @@ wget $helix_url -O $tools/helix.tar.xz &>/dev/null
 tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/helix/" -C $tools &>/dev/null
 sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
 rm $tools/helix.tar.xz &>/dev/null
+
+# change shell
+echo "Changing default shell to fish..."
+chsh /usr/bin/fish
+
 
 # run stow
 echo "Creating symlinks to dotfiles..."
