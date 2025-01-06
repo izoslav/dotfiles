@@ -98,10 +98,10 @@ tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/heli
 sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
 rm $tools/helix.tar.xz &>/dev/null
 
+# TODO fix
 # change shell
-echo "Changing default shell to fish..."
-chsh /usr/bin/fish
-
+# echo "Changing default shell to fish..."
+# chsh /usr/bin/fish
 
 # run stow
 echo "Creating symlinks to dotfiles..."
