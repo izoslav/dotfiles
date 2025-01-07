@@ -1,111 +1,224 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]; then
-	echo "Running as root..."
-	exec sudo -- "$0" $(whoami)
-	exit
+# prompt for sudo password
+prompt=$(sudo -v 2>&1)
+if [ $? -ne 0 ]; then
+	echo "Elevated privilege required!"
+	exit 
 fi
 
-# TODO organize into functions
-# TODO prettier formatting
 # TODO add git config
-# TODO handle sudo better
+# TODO error checking
+# TODO enable running single steps
 
-user=$1
+user=$(whoami)
 tools=/home/$user/tools
 
 # versions
 go_version=1.23.4
 helix_version=25.01
 
-# update apt
-sudo apt-get update
-
 # download links
 go_url=https://go.dev/dl/go$go_version.linux-amd64.tar.gz
 helix_url=https://github.com/helix-editor/helix/releases/download/$helix_version/helix-$helix_version-x86_64-linux.tar.xz
 
+# main
+function main {
+	echo "Starting setup..."
+	install_apt_packages
+	install_rust
+	install_cargo_packages
+	install_go
+	install_go_packages
+	install_tools
+	run_stow
+	change_shell
+}
+
 # install packaged tools
-cat << EOF
-Installing packages via apt-get...
-  build-essential  - basic complilers and tools
-  cmake            - build system
-  stow             - symlink manager
-  fzf              - fuzzy finder
-  fish             - shell
-  git-delta        - diff viewer
-  ripgrep          - grep replacement
-  just             - task runner
-  rustup           - rust installation manager
-  sqlite3          - cli for sqlite3
-EOF
-sudo apt-get install -y \
-	build-essential \
-	cmake \
-	stow \
-	fzf \
-	fish \
-	git-delta \
-	ripgrep \
-	just \
-	rustup \
-	sqlite3 \
-	&>/dev/null
+function install_apt_packages {
+	declare -A packages
 
-# install rust tools
-echo "Configuring rust..."
-sudo -H -u $user rustup default stable &>/dev/null
+	packages+=(
+		["build-essential"]="basic compilers and tools"
+		["cmake"]="build system"
+		["stow"]="symlink manager"
+		["fzf"]="fuzzy finder"
+		["fish"]="shell"
+		["git-delta"]="diff viewer"
+		["ripgrep"]="grep replacement"
+		["just"]="task runner"
+		["rustup"]="rust installation manager"
+		["sqlite3"]="sqlite3 cli"
+	)
 
-echo "Installing packages via cargo..."
-echo "  bat      - improved cat"
-sudo -H -u $user cargo install --locked bat &>/dev/null
-echo "  eza      - ls replacement"
-sudo -H -u $user cargo install --locked eza &>/dev/null
-echo "  starship - shell prompt"
-sudo -H -u $user cargo install --locked starship &>/dev/null
-echo "  zellij   - terminal multiplexer"
-sudo -H -u $user cargo install --locked zellij &>/dev/null
+	# update apt
+	echo "Updating package list..."
+	sudo apt-get update &>/dev/null
+
+	# get the column len
+	longest_name=0
+	for package in ${!packages[@]}; do
+		if [[ ${longest_name} -le ${#package} ]]; then
+			longest_name=${#package}
+		fi
+	done
+
+	# install packages one by one
+	echo "Installing packages..."
+	for package in ${!packages[@]}; do
+		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
+		sudo apt-get install ${package} &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			printf "done\n"
+		else
+			printf "fail\n"
+		fi
+	done
+}
+
+# install rust stable
+function install_rust {
+	printf "Configuring rust... "
+	rustup default stable &>/dev/null
+	printf "done\n"
+}
+
+# install cargo packages
+function install_cargo_packages {
+	declare -A packages
+
+	packages+=(
+		["bat"]="improved cat"
+		["eza"]="ls replacement"
+		["starship"]="shell prompt"
+		["zellij"]="terminal multiplexer"
+	)
+
+	# get the column len
+	longest_name=0
+	for package in ${!packages[@]}; do
+		if [[ ${longest_name} -le ${#package} ]]; then
+			longest_name=${#package}
+		fi
+	done
+
+	# install packages one by one
+	echo "Installing cargo packages..."
+	for package in ${!packages[@]}; do
+		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
+		cargo install --locked ${package} &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			printf "done\n"
+		else
+			printf "fail\n"
+		fi
+	done
+}
 
 # install go
-echo "Installing go $go_version"
-wget $go_url -O $tools/go.tar.gz &>/dev/null
-rm -rf /usr/local/go &>/dev/null
-tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
-rm $tools/go.tar.gz &>/dev/null
-export PATH=$PATH:/usr/local/go/bin &>/dev/null
+function install_go {
+	printf "Installing go $go_version... "
 
-# install go tools
-export GOBIN=/home/$user/go/bin
+	if [[ $(go version) == *${go_version}* ]]; then
+		printf "already installed\n"
+		return
+	fi
 
-echo "Installing go packages..."
-echo "  delve - debugger"
-go install github.com/go-delve/delve/cmd/dlv@latest &>/dev/null
-echo "  goose - migration runner"
-go install github.com/pressly/goose/v3/cmd/goose@latest &>/dev/null
-echo "  gopls - language server"
-go install golang.org/x/tools/gopls@latest &>/dev/null
-echo "  gow   - go watch"
-go install github.com/mitranim/gow@latest &>/dev/null
+	wget $go_url -O $tools/go.tar.gz &>/dev/null
+	rm -rf /usr/local/go &>/dev/null
+	tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
+	rm $tools/go.tar.gz &>/dev/null
+	printf "done\n"
+}
 
-# create folders
-echo "Downlading and installing other tools..."
-mkdir -p $tools
+# install go packages
+function install_go_packages {
+	export PATH=$PATH:/usr/local/go/bin &>/dev/null
 
-# download helix
-echo "  helix $helix_version"
-wget $helix_url -O $tools/helix.tar.xz &>/dev/null
-tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/helix/" -C $tools &>/dev/null
-sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
-rm $tools/helix.tar.xz &>/dev/null
+	declare -A packages
+	declare -A urls
 
-# TODO fix
-# change shell
-# echo "Changing default shell to fish..."
-# chsh /usr/bin/fish
+	packages+=(
+		["delve"]="debugger"
+		["goose"]="db migration runner"
+		["gopls"]="language server"
+		["gow"]="go watch"
+	)
 
-# run stow
-echo "Creating symlinks to dotfiles..."
-mkdir -p /home/$user/.config
-stow . -t /home/$user &>/dev/null
+	urls+=(
+		["delve"]="github.com/go-delve/delve/cmd/dlv@latest"
+		["goose"]="github.com/pressly/goose/v3/cmd/goose@latest"
+		["gopls"]="golang.org/x/tools/gopls@latest"
+		["gow"]="github.com/mitranim/gow@latest"
+	)
 
-echo "Done!"
+	# get the column len
+	longest_name=0
+	for package in ${!packages[@]}; do
+		if [[ ${longest_name} -le ${#package} ]]; then
+			longest_name=${#package}
+		fi
+	done
+
+	# install packages one by one
+	echo "Installing go packages..."
+	for package in ${!packages[@]}; do
+		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
+		go install ${urls[${package}]} &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			printf "done\n"
+		else
+			printf "fail\n"
+		fi
+	done
+}
+
+function install_tools {
+	# create folders
+	echo "Downlading and installing other tools..."
+	mkdir -p $tools
+
+	printf "  installing helix $helix_version... "
+	if [[ $(hx --version) == *"${helix_version}"* ]]; then
+		printf "already installed\n"
+		return
+	fi
+
+	wget $helix_url -O $tools/helix.tar.xz &>/dev/null
+	tar xf $tools/helix.tar.xz --transform="s/helix-$helix_version-x86_64-linux/helix/" -C $tools &>/dev/null
+	sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
+	rm $tools/helix.tar.xz &>/dev/null
+
+	printf "done\n"
+}
+
+function run_stow {
+	printf "Creating symlinks to dotfiles... "
+
+	stow --version &>/dev/null
+	if [[ $? -ne 0 ]]; then
+		printf "fail, stow not installed\n"
+		return
+	fi
+	
+	mkdir -p /home/$user/.config
+	stow . -t /home/$user &>/dev/null
+	printf "done\n"
+}
+
+function change_shell {
+	printf "Changing default shell to fish... "
+
+	fish --version &>/dev/null
+	if [[ $? -ne 0 ]]; then
+		printf "fail, fish not installed\n"
+		return
+	fi
+
+	sudo chsh $(whoami) -s /usr/bin/fish &>/dev/null
+	printf "done\n"
+}
+
+# entrypoint
+main
