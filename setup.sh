@@ -31,6 +31,8 @@ function main {
 	install_go
 	install_go_packages
 	install_tools
+	install_docker
+
 	run_stow
 	change_shell
 }
@@ -191,6 +193,39 @@ function install_tools {
 	rm $tools/helix.tar.xz &>/dev/null
 
 	printf "done\n"
+}
+
+function install_docker {
+	printf "Installing docker...\n"
+
+	printf "  adding docker's GPG key... "
+	sudo apt-get update &>/dev/null
+	sudo apt-get install ca-certificates curl &>/dev/null
+	sudo install -m 0755 -d /etc/apt/keyrings &>/dev/null
+	sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc &>/dev/null
+	sudo chmod a+r /etc/apt/keyrings/docker.asc &>/dev/null
+	printf "done\n"
+
+	printf "  adding docker respository to apt sources... "
+	sudo rm /etc/apt/sources.list.d/docker.list &>/dev/null
+	echo \
+	  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+	  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+	  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	sudo apt-get update &>/dev/null
+	printf "done\n"
+
+	printf "  installing docker packages...\n"
+	packages=("docker-ce" "docker-ce-cli" "containerd.io" "docker-buildx-plugin" "docker-compose-plugin")
+	for i in ${!packages[@]}; do
+		printf "    installing ${packages[${i}]}... "
+		sudo apt-get install -y ${packages[${i}]} &>/dev/null
+		if [[ $? -eq 0 ]]; then
+			printf "done\n"
+		else
+			printf "fail\n"
+		fi
+	done
 }
 
 function run_stow {
