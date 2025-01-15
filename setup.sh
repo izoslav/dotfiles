@@ -33,6 +33,7 @@ function main {
 	install_tools
 	install_docker
 
+	setup_git_delta
 	run_stow
 	change_shell
 }
@@ -252,6 +253,17 @@ function change_shell {
 	fi
 
 	sudo chsh $(whoami) -s /usr/bin/fish &>/dev/null
+	printf "done\n"
+}
+
+function setup_git_delta {
+	printf "Switching git diff to delta... "
+
+	git config --global core.pager delta &>/dev/null
+	git config --global interactive.diffFilter 'delta --color-only' &>/dev/null
+	git config --global delta.navigate true &>/dev/null
+	git config --global merge.conflictStyle zdiff3 &>/dev/null
+
 	printf "done\n"
 }
 
