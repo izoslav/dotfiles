@@ -1,7 +1,3 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
-end
-
 # Aliases
 ## generic
 alias ..='cd ..'
@@ -43,11 +39,14 @@ fish_add_path ~/.local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path ~/go/bin
 
-# Starship
-source (/home/izoslav/.cargo/bin/starship init fish --print-full-init | psub)
+if status is-interactive
+    # Commands to run in interactive sessions can go here
+    # Starship
+    source (/home/izoslav/.cargo/bin/starship init fish --print-full-init | psub)
 
-# Start Zellij
-if set -q ZELLIJ
-else
-    zellij
+    # Start Zellij
+    if set -q ZELLIJ
+    else
+        zellij
+    end
 end
