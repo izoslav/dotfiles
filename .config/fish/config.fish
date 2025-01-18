@@ -42,7 +42,7 @@ fish_add_path ~/go/bin
 if status is-interactive
     # Commands to run in interactive sessions can go here
     # Starship
-    source (/home/izoslav/.cargo/bin/starship init fish --print-full-init | psub)
+    source (~/.cargo/bin/starship init fish --print-full-init | psub)
 
     # Start Zellij
     if set -q ZELLIJ
