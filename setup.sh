@@ -97,6 +97,7 @@ function install_apt_packages {
 function install_rust {
 	printf "Configuring rust... "
 	rustup default stable &>/dev/null
+	rustup upgrade &>/dev/null
 	print_done
 }
 
