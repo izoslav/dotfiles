@@ -17,6 +17,7 @@ tools=/home/$user/tools
 # versions
 go_version=1.23.4
 helix_version=25.01
+helix_version_check=25.1
 
 # download links
 go_url=https://go.dev/dl/go$go_version.linux-amd64.tar.gz
@@ -137,14 +138,14 @@ function install_cargo_packages {
 function install_go {
 	printf "Installing go $go_version... "
 
-	if [[ $(go version) == *${go_version}* ]]; then
+	if [[ $(go version 2>/dev/null) == *${go_version}* ]]; then
 		print_skip
 		return
 	fi
 
 	wget $go_url -O $tools/go.tar.gz &>/dev/null
-	rm -rf /usr/local/go &>/dev/null
-	tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
+	sudo rm -rf /usr/local/go &>/dev/null
+	sudo tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
 	rm $tools/go.tar.gz &>/dev/null
 	print_done
 }
@@ -197,7 +198,7 @@ function install_tools {
 	mkdir -p $tools
 
 	printf "  installing helix $helix_version... "
-	if [[ $(hx --version) == *"${helix_version}"* ]]; then
+	if [[ $(hx --version 2>/dev/null) == *"${helix_version_check}"* ]]; then
 		print_skip
 		return
 	fi
@@ -211,7 +212,13 @@ function install_tools {
 }
 
 function install_docker {
-	printf "Installing docker...\n"
+	printf "Installing docker..."
+
+	docker --version &>/dev/null
+	if [[ $? -eq 0 ]]; then
+		print_skip
+		return
+	fi
 
 	printf "  adding docker's GPG key... "
 	sudo apt-get update &>/dev/null
