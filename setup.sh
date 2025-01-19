@@ -22,6 +22,19 @@ helix_version=25.01
 go_url=https://go.dev/dl/go$go_version.linux-amd64.tar.gz
 helix_url=https://github.com/helix-editor/helix/releases/download/$helix_version/helix-$helix_version-x86_64-linux.tar.xz
 
+# decorators
+function print_done {
+	printf "\e[32mdone\e[0m\n"
+}
+
+function print_skip {
+	printf "\e[33mskip\e[0m\n"
+}
+
+function print_fail {
+	printf "\e[31mfail\e[0m\n"
+}
+
 # main
 function main {
 	echo "Starting setup..."
@@ -73,9 +86,9 @@ function install_apt_packages {
 		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
 		sudo apt-get install -y ${package} &>/dev/null
 		if [[ $? -eq 0 ]]; then
-			printf "done\n"
+			print_done
 		else
-			printf "fail\n"
+			print_fail
 		fi
 	done
 }
@@ -84,7 +97,7 @@ function install_apt_packages {
 function install_rust {
 	printf "Configuring rust... "
 	rustup default stable &>/dev/null
-	printf "done\n"
+	print_done
 }
 
 # install cargo packages
@@ -112,9 +125,9 @@ function install_cargo_packages {
 		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
 		cargo install --locked ${package} &>/dev/null
 		if [[ $? -eq 0 ]]; then
-			printf "done\n"
+			print_done
 		else
-			printf "fail\n"
+			print_fail
 		fi
 	done
 }
@@ -124,7 +137,7 @@ function install_go {
 	printf "Installing go $go_version... "
 
 	if [[ $(go version) == *${go_version}* ]]; then
-		printf "already installed\n"
+		print_skip
 		return
 	fi
 
@@ -132,7 +145,7 @@ function install_go {
 	rm -rf /usr/local/go &>/dev/null
 	tar xzf $tools/go.tar.gz -C /usr/local &>/dev/null
 	rm $tools/go.tar.gz &>/dev/null
-	printf "done\n"
+	print_done
 }
 
 # install go packages
@@ -170,9 +183,9 @@ function install_go_packages {
 		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
 		go install ${urls[${package}]} &>/dev/null
 		if [[ $? -eq 0 ]]; then
-			printf "done\n"
+			print_done
 		else
-			printf "fail\n"
+			print_fail
 		fi
 	done
 }
@@ -184,7 +197,7 @@ function install_tools {
 
 	printf "  installing helix $helix_version... "
 	if [[ $(hx --version) == *"${helix_version}"* ]]; then
-		printf "already installed\n"
+		print_skip
 		return
 	fi
 
@@ -193,7 +206,7 @@ function install_tools {
 	sudo ln -sf $tools/helix/hx /usr/bin/hx &>/dev/null
 	rm $tools/helix.tar.xz &>/dev/null
 
-	printf "done\n"
+	print_done
 }
 
 function install_docker {
@@ -205,7 +218,7 @@ function install_docker {
 	sudo install -m 0755 -d /etc/apt/keyrings &>/dev/null
 	sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc &>/dev/null
 	sudo chmod a+r /etc/apt/keyrings/docker.asc &>/dev/null
-	printf "done\n"
+	print_done
 
 	printf "  adding docker respository to apt sources... "
 	sudo rm /etc/apt/sources.list.d/docker.list &>/dev/null
@@ -214,7 +227,7 @@ function install_docker {
 	  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
 	  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 	sudo apt-get update &>/dev/null
-	printf "done\n"
+	print_done
 
 	printf "  installing docker packages...\n"
 	packages=("docker-ce" "docker-ce-cli" "containerd.io" "docker-buildx-plugin" "docker-compose-plugin")
@@ -222,9 +235,9 @@ function install_docker {
 		printf "    installing ${packages[${i}]}... "
 		sudo apt-get install -y ${packages[${i}]} &>/dev/null
 		if [[ $? -eq 0 ]]; then
-			printf "done\n"
+			print_done
 		else
-			printf "fail\n"
+			print_fail
 		fi
 	done
 }
@@ -234,13 +247,13 @@ function run_stow {
 
 	stow --version &>/dev/null
 	if [[ $? -ne 0 ]]; then
-		printf "fail, stow not installed\n"
+		print_fail
 		return
 	fi
 	
 	mkdir -p /home/$user/.config
 	stow . -t /home/$user &>/dev/null
-	printf "done\n"
+	print_done
 }
 
 function change_shell {
@@ -248,12 +261,12 @@ function change_shell {
 
 	fish --version &>/dev/null
 	if [[ $? -ne 0 ]]; then
-		printf "fail, fish not installed\n"
+		print_fail
 		return
 	fi
 
 	sudo chsh $(whoami) -s /usr/bin/fish &>/dev/null
-	printf "done\n"
+	print_done
 }
 
 function setup_git_delta {
@@ -264,7 +277,7 @@ function setup_git_delta {
 	git config --global delta.navigate true &>/dev/null
 	git config --global merge.conflictStyle zdiff3 &>/dev/null
 
-	printf "done\n"
+	print_done
 }
 
 # entrypoint
