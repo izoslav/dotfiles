@@ -71,7 +71,7 @@ function install_apt_packages {
 	echo "Installing packages..."
 	for package in ${!packages[@]}; do
 		printf "  installing %-${longest_name}s - %s... " "${package}" "${packages[${package}]}"
-		sudo apt-get install ${package} &>/dev/null
+		sudo apt-get install -y ${package} &>/dev/null
 		if [[ $? -eq 0 ]]; then
 			printf "done\n"
 		else
