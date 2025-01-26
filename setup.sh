@@ -67,6 +67,10 @@ function install_apt_packages {
 		["just"]="task runner"
 		["rustup"]="rust installation manager"
 		["sqlite3"]="sqlite3 cli"
+		["clang"]="c/c++ compiler llvm frontend"
+		["clangd"]="c/c++ llvm lsp"
+		["ninja-build"]="build system"
+		["lldb"]="llvm debugger"
 	)
 
 	# update apt
