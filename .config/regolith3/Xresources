@@ -7,3 +7,6 @@ wm.bar.status_command: i3status-rs
 
 !regolith.look.path: /usr/share/regolith-look/catppuccin
 regolith.look.path: /usr/share/regolith-look/lascaille
+
+# lockscreen
+wm.program.lock: /usr/bin/swaylock /home/izoslav/Pictures/wallpapers/evening-sky.png
