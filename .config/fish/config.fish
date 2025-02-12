@@ -39,6 +39,11 @@ fish_add_path ~/.local/bin
 fish_add_path /usr/local/go/bin
 fish_add_path ~/go/bin
 
+## emscripten
+fish_add_path ~/git/emscripten-core/emsdk
+fish_add_path ~/git/emscripten-core/emsdk/upstream/emscripten
+EMSDK_QUIET=1 source ~/git/emscripten-core/emsdk/emsdk_env.fish
+
 if status is-interactive
     # Commands to run in interactive sessions can go here
     # Starship
