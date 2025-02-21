@@ -1,0 +1,3 @@
+@import "/usr/share/rofi/themes/solarized_alternate.rasi"
+
+@theme "/home/izoslav/.local/share/rofi/themes/rounded-nord-dark.rasi"

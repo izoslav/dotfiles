@@ -1,0 +1,47 @@
+[
+  {
+    "context": "Workspace",
+    "bindings": {}
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      // unbind space because it's shitty
+      "space": null,
+
+      // toggles
+      "space f": "file_finder::Toggle",
+      "space F": "file_finder::Toggle",
+      "space s": "project_symbols::Toggle",
+      "space i": "assistant::ToggleFocus",
+      "space o": "outline::Toggle",
+      "space d": "diagnostics::Deploy",
+
+      // actions
+      "space a": "editor::ToggleCodeActions",
+      "space c": "vim::ToggleComments",
+      "space k": "editor::Hover",
+      "space p": "command_palette::Toggle",
+      "space r": "editor::Rename",
+      "space R": "vim::PushReplaceWithRegister",
+      "U": "vim::Redo",
+      "space /": "vim::Search",
+
+      // movement
+      "g e": "vim::EndOfDocument",
+      // "x": "editor::SelectLine",
+
+      // pane movement
+      "space w j": "workspace::ActivatePaneDown",
+      "space w down": "workspace::ActivatePaneDown",
+      "space w k": "workspace::ActivatePaneLeft",
+      "space w up": "workspace::ActivatePaneUp",
+      "space w h": "workspace::ActivatePaneUp",
+      "space w left": "workspace::ActivatePaneLeft",
+      "space w l": "workspace::ActivatePaneRight",
+      "space w right": "workspace::ActivatePaneRight",
+      "space [": "pane::ActivatePrevItem",
+      "space ]": "pane::ActivateNextItem"
+    }
+  }
+]
